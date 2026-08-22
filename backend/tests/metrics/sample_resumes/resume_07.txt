@@ -1,0 +1,22 @@
+Arjun Desai
+Software Engineer
+
+arjun.desai12@gmail.com
+9871234560
+Hyderabad, India
+linkedin.com/in/arjun-desai12
+github.com/arjundesai12
+
+EDUCATION
+Bachelor of Technology in Computer Science
+Hyderabad Institute of Technology
+Jul 2020 - May 2024
+
+EXPERIENCE
+Software Engineer
+Bright Path Technologies
+Jun 2024 - Present
+Building backend services using Python, Flask and PostgreSQL.
+
+SKILLS
+Python, Flask, PostgreSQL, Docker, Git, GitHub, AWS, REST API, MongoDB, Redis, Kubernetes, Linux

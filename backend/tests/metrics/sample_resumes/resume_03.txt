@@ -1,0 +1,24 @@
+Priya Nair
+Software Developer
+
+priya.nair90@gmail.com
+Chennai, India
+linkedin.com/in/priya-nair90
+
+EDUCATION
+Bachelor of Engineering in Computer Science
+Chennai College of Engineering
+2018 - 2022
+
+EXPERIENCE
+Software Engineer
+DataWorks Technologies
+Jun 2022 - Present
+Building scalable backend services with Python and PostgreSQL.
+
+SKILLS
+Python, Django, PostgreSQL, Redis, Docker, Kubernetes, AWS, Git
+
+PROJECTS
+Analytics Dashboard
+Data visualization dashboard using Python and Pandas.

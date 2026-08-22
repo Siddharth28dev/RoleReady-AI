@@ -1,0 +1,37 @@
+Ananya Rao
+Software Engineer
+
+ananya.rao88@gmail.com | 9876543210 | Bengaluru, India
+linkedin.com/in/ananya-rao | github.com/ananya-rao
+
+SUMMARY
+Backend engineer with 2 years of experience building REST APIs and microservices.
+
+EDUCATION
+Bachelor of Technology in Computer Science
+Bengaluru Institute of Technology
+Aug 2019 - Jun 2023
+
+EXPERIENCE
+Backend Developer
+Krishna Softwares Pvt Ltd
+Jul 2023 - Present
+Built REST APIs using Python and Flask, integrated PostgreSQL database.
+
+Software Engineering Intern
+TechNova Solutions
+Jan 2023 - Jun 2023
+Worked on Django backend services and Docker deployments.
+
+SKILLS
+Python, Flask, Django, PostgreSQL, Docker, Git, AWS, REST API, MongoDB
+
+PROJECTS
+Inventory Management System
+Built a full-stack inventory tracker using Flask and PostgreSQL.
+
+Chat Application
+Real-time chat app using WebSockets and Redis.
+
+CERTIFICATIONS
+AWS Certified Cloud Practitioner

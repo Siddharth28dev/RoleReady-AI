@@ -1,0 +1,29 @@
+Rohit Mehta
+Aspiring Software Developer
+
+rohit.mehta21@gmail.com
+9123456780
+Pune, India
+linkedin.com/in/rohit-mehta21
+github.com/rohitmehta21
+
+EDUCATION
+Bachelor of Technology in Information Technology
+Pune Institute of Engineering
+07/2021 - 05/2025
+
+EXPERIENCE
+Backend Developer Intern
+CodeCraft Labs
+01/2025 - 04/2025
+Developed APIs using Node.js and Express, worked with MongoDB.
+
+SKILLS
+JavaScript, Node.js, Express, MongoDB, Git, GitHub, HTML, CSS, React
+
+PROJECTS
+E-commerce Backend
+Node.js and Express based backend with MongoDB.
+
+Portfolio Website
+Personal portfolio built using React and Tailwind.

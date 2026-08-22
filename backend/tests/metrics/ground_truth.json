@@ -1,0 +1,90 @@
+{
+  "resume_01.txt": {
+    "note": "clean baseline resume, month-name dates, all fields present",
+    "email": "ananya.rao88@gmail.com",
+    "phone": "9876543210",
+    "linkedin_present": true,
+    "github_present": true,
+    "min_education_entries": 1,
+    "min_experience_date_ranges": 2,
+    "min_projects": 2,
+    "expected_skills": ["python", "flask", "django", "postgresql", "docker", "git", "aws", "mongodb"]
+  },
+  "resume_02.txt": {
+    "note": "numeric MM/YYYY dates throughout (regression test for the date-regex fix)",
+    "email": "rohit.mehta21@gmail.com",
+    "phone": "9123456780",
+    "linkedin_present": true,
+    "github_present": true,
+    "min_education_entries": 1,
+    "min_experience_date_ranges": 1,
+    "min_projects": 2,
+    "expected_skills": ["javascript", "node.js", "express", "mongodb", "git", "github", "html", "css", "react"]
+  },
+  "resume_03.txt": {
+    "note": "deliberately no phone number, no GitHub — these should genuinely read as missing",
+    "email": "priya.nair90@gmail.com",
+    "phone": null,
+    "linkedin_present": true,
+    "github_present": false,
+    "min_education_entries": 1,
+    "min_experience_date_ranges": 1,
+    "min_projects": 1,
+    "expected_skills": ["python", "django", "postgresql", "redis", "docker", "kubernetes", "aws", "git"]
+  },
+  "resume_04.txt": {
+    "note": "no LinkedIn/GitHub at all (not even as a link) — should genuinely read as missing, 2 jobs, 3 projects",
+    "email": "vikram.singh77@gmail.com",
+    "phone": "9988776655",
+    "linkedin_present": false,
+    "github_present": false,
+    "min_education_entries": 1,
+    "min_experience_date_ranges": 2,
+    "min_projects": 3,
+    "expected_skills": ["java", "spring", "spring boot", "mysql", "docker", "kubernetes", "git", "aws"]
+  },
+  "resume_05.docx": {
+    "note": "DOCX with icon-style hyperlinks (visible text != URL) — regression test for the Bug 5 docx fix",
+    "email": "meera.iyer33@gmail.com",
+    "phone": "9765432180",
+    "linkedin_present": true,
+    "github_present": true,
+    "min_education_entries": 1,
+    "min_experience_date_ranges": 1,
+    "min_projects": 1,
+    "expected_skills": ["python", "flask", "postgresql", "docker", "git", "aws"]
+  },
+  "resume_06.txt": {
+    "note": "irregular whitespace, space before @ (regression test for Bug 2), bare-year dates",
+    "email": "sneha.kulkarni99@gmail.com",
+    "phone": "9090909090",
+    "linkedin_present": false,
+    "github_present": false,
+    "min_education_entries": 1,
+    "min_experience_date_ranges": 1,
+    "min_projects": 1,
+    "expected_skills": ["python", "flask", "postgresql", "docker", "git", "aws"]
+  },
+  "resume_07.txt": {
+    "note": "strong resume, no projects section at all — should read as 0 projects, not crash",
+    "email": "arjun.desai12@gmail.com",
+    "phone": "9871234560",
+    "linkedin_present": true,
+    "github_present": true,
+    "min_education_entries": 1,
+    "min_experience_date_ranges": 1,
+    "min_projects": 0,
+    "expected_skills": ["python", "flask", "postgresql", "docker", "git", "github", "aws", "mongodb", "redis", "kubernetes", "linux"]
+  },
+  "resume_08.txt": {
+    "note": "minimal resume — only contact + skills, no education/experience/projects sections at all. Tests graceful degradation.",
+    "email": "kabir.malhotra5@gmail.com",
+    "phone": "9812345670",
+    "linkedin_present": false,
+    "github_present": false,
+    "min_education_entries": 0,
+    "min_experience_date_ranges": 0,
+    "min_projects": 0,
+    "expected_skills": ["python", "flask", "git", "docker"]
+  }
+}

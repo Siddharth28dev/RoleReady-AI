@@ -1,0 +1,30 @@
+Sneha   Kulkarni
+Software     Engineer
+
+
+   sneha.kulkarni99 @ gmail.com     9090909090
+
+
+Mumbai, India
+
+EDUCATION
+
+Bachelor    of    Technology   in   Computer   Engineering
+Mumbai University
+2019-2023
+
+EXPERIENCE
+
+Backend Developer
+CloudNext Technologies
+2023-Present
+Working on Python microservices and PostgreSQL.
+
+SKILLS
+
+Python,   Flask,   PostgreSQL,   Docker,    Git,   AWS
+
+PROJECTS
+
+Task Scheduler
+Built using Python and Celery.

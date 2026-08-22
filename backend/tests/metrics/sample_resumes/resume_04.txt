@@ -1,0 +1,35 @@
+Vikram Singh
+Backend Engineer
+
+vikram.singh77@gmail.com
+9988776655
+Delhi, India
+
+EDUCATION
+Bachelor of Technology in Computer Science
+Delhi Institute of Technology
+Aug 2017 - Jun 2021
+
+EXPERIENCE
+Backend Developer
+Nexa Systems
+Jul 2021 - Present
+Developed microservices using Java and Spring Boot.
+
+Junior Developer
+InfoBridge Pvt Ltd
+Jun 2020 - Jun 2021
+Worked on REST APIs using Java and MySQL.
+
+SKILLS
+Java, Spring, Spring Boot, MySQL, Docker, Kubernetes, Git, AWS, REST API
+
+PROJECTS
+Order Management System
+Built using Java Spring Boot and MySQL.
+
+Payment Gateway Integration
+Integrated third-party payment gateway APIs.
+
+Notification Service
+Built an event-driven notification microservice.

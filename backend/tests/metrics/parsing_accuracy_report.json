@@ -1,0 +1,231 @@
+{
+  "overall_field_accuracy": 100.0,
+  "overall_skill_recall": 100.0,
+  "n_resumes": 8,
+  "results": [
+    {
+      "file": "resume_01.txt",
+      "note": "clean baseline resume, month-name dates, all fields present",
+      "field_accuracy": 100.0,
+      "checks": {
+        "email": true,
+        "phone": true,
+        "linkedin": true,
+        "github": true,
+        "education_count": true,
+        "experience_dates": true,
+        "projects_count": true,
+        "skills_recall_ok": true
+      },
+      "skill_recall": 100.0,
+      "skills_missed": [],
+      "raw_extracted": {
+        "email": "ananya.rao88@gmail.com",
+        "phone": "9876543210",
+        "linkedin": "linkedin.com/in/ananya-rao",
+        "github": "github.com/ananya-rao",
+        "education_entries": 2,
+        "experience_date_ranges": [
+          "Jul 2023 - Present",
+          "Jan 2023 - Jun 2023"
+        ],
+        "projects_found": 4
+      }
+    },
+    {
+      "file": "resume_02.txt",
+      "note": "numeric MM/YYYY dates throughout (regression test for the date-regex fix)",
+      "field_accuracy": 100.0,
+      "checks": {
+        "email": true,
+        "phone": true,
+        "linkedin": true,
+        "github": true,
+        "education_count": true,
+        "experience_dates": true,
+        "projects_count": true,
+        "skills_recall_ok": true
+      },
+      "skill_recall": 100.0,
+      "skills_missed": [],
+      "raw_extracted": {
+        "email": "rohit.mehta21@gmail.com",
+        "phone": "9123456780",
+        "linkedin": "linkedin.com/in/rohit-mehta21",
+        "github": "github.com/rohitmehta21",
+        "education_entries": 1,
+        "experience_date_ranges": [
+          "01/2025 - 04/2025"
+        ],
+        "projects_found": 4
+      }
+    },
+    {
+      "file": "resume_03.txt",
+      "note": "deliberately no phone number, no GitHub \u00e2\u20ac\u201d these should genuinely read as missing",
+      "field_accuracy": 100.0,
+      "checks": {
+        "email": true,
+        "phone": true,
+        "linkedin": true,
+        "github": true,
+        "education_count": true,
+        "experience_dates": true,
+        "projects_count": true,
+        "skills_recall_ok": true
+      },
+      "skill_recall": 100.0,
+      "skills_missed": [],
+      "raw_extracted": {
+        "email": "priya.nair90@gmail.com",
+        "phone": null,
+        "linkedin": "linkedin.com/in/priya-nair90",
+        "github": null,
+        "education_entries": 1,
+        "experience_date_ranges": [
+          "Jun 2022 - Present"
+        ],
+        "projects_found": 2
+      }
+    },
+    {
+      "file": "resume_04.txt",
+      "note": "no LinkedIn/GitHub at all (not even as a link) \u00e2\u20ac\u201d should genuinely read as missing, 2 jobs, 3 projects",
+      "field_accuracy": 100.0,
+      "checks": {
+        "email": true,
+        "phone": true,
+        "linkedin": true,
+        "github": true,
+        "education_count": true,
+        "experience_dates": true,
+        "projects_count": true,
+        "skills_recall_ok": true
+      },
+      "skill_recall": 100.0,
+      "skills_missed": [],
+      "raw_extracted": {
+        "email": "vikram.singh77@gmail.com",
+        "phone": "9988776655",
+        "linkedin": null,
+        "github": null,
+        "education_entries": 1,
+        "experience_date_ranges": [
+          "Jul 2021 - Present",
+          "Jun 2020 - Jun 2021"
+        ],
+        "projects_found": 6
+      }
+    },
+    {
+      "file": "resume_05.docx",
+      "note": "DOCX with icon-style hyperlinks (visible text != URL) \u00e2\u20ac\u201d regression test for the Bug 5 docx fix",
+      "field_accuracy": 100.0,
+      "checks": {
+        "email": true,
+        "phone": true,
+        "linkedin": true,
+        "github": true,
+        "education_count": true,
+        "experience_dates": true,
+        "projects_count": true,
+        "skills_recall_ok": true
+      },
+      "skill_recall": 100.0,
+      "skills_missed": [],
+      "raw_extracted": {
+        "email": "meera.iyer33@gmail.com",
+        "phone": "9765432180",
+        "linkedin": "linkedin.com/in/meera-iyer33",
+        "github": "github.com/meeraiyer33",
+        "education_entries": 1,
+        "experience_date_ranges": [
+          "Jun 2024 - Present"
+        ],
+        "projects_found": 4
+      }
+    },
+    {
+      "file": "resume_06.txt",
+      "note": "irregular whitespace, space before @ (regression test for Bug 2), bare-year dates",
+      "field_accuracy": 100.0,
+      "checks": {
+        "email": true,
+        "phone": true,
+        "linkedin": true,
+        "github": true,
+        "education_count": true,
+        "experience_dates": true,
+        "projects_count": true,
+        "skills_recall_ok": true
+      },
+      "skill_recall": 100.0,
+      "skills_missed": [],
+      "raw_extracted": {
+        "email": "sneha.kulkarni99@gmail.com",
+        "phone": "9090909090",
+        "linkedin": null,
+        "github": null,
+        "education_entries": 2,
+        "experience_date_ranges": [
+          "\n2023-Present"
+        ],
+        "projects_found": 2
+      }
+    },
+    {
+      "file": "resume_07.txt",
+      "note": "strong resume, no projects section at all \u00e2\u20ac\u201d should read as 0 projects, not crash",
+      "field_accuracy": 100.0,
+      "checks": {
+        "email": true,
+        "phone": true,
+        "linkedin": true,
+        "github": true,
+        "education_count": true,
+        "experience_dates": true,
+        "projects_count": true,
+        "skills_recall_ok": true
+      },
+      "skill_recall": 100.0,
+      "skills_missed": [],
+      "raw_extracted": {
+        "email": "arjun.desai12@gmail.com",
+        "phone": "9871234560",
+        "linkedin": "linkedin.com/in/arjun-desai12",
+        "github": "github.com/arjundesai12",
+        "education_entries": 1,
+        "experience_date_ranges": [
+          "Jun 2024 - Present"
+        ],
+        "projects_found": 0
+      }
+    },
+    {
+      "file": "resume_08.txt",
+      "note": "minimal resume \u00e2\u20ac\u201d only contact + skills, no education/experience/projects sections at all. Tests graceful degradation.",
+      "field_accuracy": 100.0,
+      "checks": {
+        "email": true,
+        "phone": true,
+        "linkedin": true,
+        "github": true,
+        "education_count": true,
+        "experience_dates": true,
+        "projects_count": true,
+        "skills_recall_ok": true
+      },
+      "skill_recall": 100.0,
+      "skills_missed": [],
+      "raw_extracted": {
+        "email": "kabir.malhotra5@gmail.com",
+        "phone": "9812345670",
+        "linkedin": null,
+        "github": null,
+        "education_entries": 0,
+        "experience_date_ranges": [],
+        "projects_found": 0
+      }
+    }
+  ]
+}

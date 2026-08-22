@@ -1,0 +1,6 @@
+{
+  "base_model": "google/flan-t5-base",
+  "lora_adapter": "./flan_t5_interview_v7",
+  "max_input_len": 128,
+  "max_target_len": 64
+}

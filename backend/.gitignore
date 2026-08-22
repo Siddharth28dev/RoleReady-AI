@@ -1,0 +1,13 @@
+.env
+
+# Uploaded resumes are transient — delete_upload() (file_handler.py) removes
+# them from disk right after text extraction, but nothing should ever commit
+# whatever happens to be sitting here mid-request either. Keep the folder
+# itself (.gitkeep) so UPLOAD_FOLDER exists on a fresh clone.
+uploads/*
+!uploads/.gitkeep
+
+.venv/
+node_modules/
+__pycache__/
+*.pyc
