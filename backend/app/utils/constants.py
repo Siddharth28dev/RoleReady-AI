@@ -63,6 +63,22 @@ SOFT_SKILLS = [
     "collaboration", "project management", "agile", "scrum", "kanban",
 ]
  
+# BUGFIX: core CS fundamentals were missing from the skill vocabulary
+# entirely. A resume literally listing "Data Structures and Algorithms"
+# under a "Core Subjects" heading had no way to be recognized as having
+# either skill -- extraction only matches strings that exist in one of
+# these lists, so "algorithms" and "data structures" could never appear
+# in all_skills, which meant skill-gap matching against a job description
+# always flagged them as missing, regardless of what the resume said.
+CORE_CS_SUBJECTS = [
+    "data structures", "algorithms", "data structures and algorithms",
+    "oop", "object oriented programming", "oops",
+    "dbms", "database management system",
+    "operating system", "operating systems",
+    "computer networks", "computer networking",
+    "system design", "software engineering",
+]
+ 
 # Combined flat list for fast lookup (excludes ambiguous ones — handled separately)
 ALL_SKILLS = (
     PROGRAMMING_LANGUAGES
@@ -72,6 +88,7 @@ ALL_SKILLS = (
     + CLOUD_DEVOPS
     + DATA_ML
     + SOFT_SKILLS
+    + CORE_CS_SUBJECTS
 )
  
 # Category reverse lookup (skill → category name) for grouping
@@ -83,6 +100,7 @@ SKILL_CATEGORY_MAP = (
     | {s: "cloud_devops"        for s in CLOUD_DEVOPS}
     | {s: "data_ml"             for s in DATA_ML}
     | {s: "soft_skills"         for s in SOFT_SKILLS}
+    | {s: "core_cs_subjects"    for s in CORE_CS_SUBJECTS}
     | AMBIGUOUS_SKILLS  # ambiguous ones carry their own category
 )
  
@@ -91,8 +109,16 @@ SKILL_CATEGORY_MAP = (
 # ──────────────────────────────────────────────
  
 DEGREE_KEYWORDS = [
-    "b.tech", "btech", "b.e", "be", "bachelor", "b.sc", "bsc",
-    "m.tech", "mtech", "m.e", "me", "master", "m.sc", "msc",
+    # BUGFIX: bare "be" and "me" removed. They were meant as short forms
+    # for "B.E." / "M.E." degrees, but _extract_education() matched them
+    # as plain substrings — "be" matched inside "Uber", "me" matched
+    # inside "Summer", "Framework", "implemented", turning ordinary
+    # Experience-section sentences into fake education entries. "b.e"
+    # and "m.e" (with the period) already cover the real degree
+    # abbreviation correctly, so the bare forms added false-positive risk
+    # without adding any real detection value.
+    "b.tech", "btech", "b.e", "bachelor", "b.sc", "bsc",
+    "m.tech", "mtech", "m.e", "master", "m.sc", "msc",
     "mba", "phd", "ph.d", "doctorate", "diploma", "10th", "12th",
     "high school", "intermediate",
 ]
@@ -103,9 +129,22 @@ DEGREE_KEYWORDS = [
  
 SECTION_HEADERS = {
     "education":    ["education", "academic", "qualification", "degree"],
-    "experience":   ["experience", "work history", "employment", "internship"],
+    # BUGFIX: "professional experience" / "work experience" / "relevant
+    # experience" added. Header matching requires the line to START WITH
+    # a keyword, and the bare word "experience" alone doesn't match
+    # "PROFESSIONAL EXPERIENCE" — an extremely common heading. That meant
+    # the Experience section was never recognized as its own section, so
+    # all of it silently got appended onto whatever section came before
+    # it (Education), which combined with the DEGREE_KEYWORDS substring
+    # bug above produced fake education entries out of job/internship text.
+    "experience":   ["experience", "professional experience", "work experience",
+                      "relevant experience", "work history", "employment", "internship"],
     "skills":       ["skills", "technical skills", "technologies", "competencies"],
-    "projects":     ["projects", "personal projects", "academic projects"],
+    # "technical projects" added — same startswith-matching gap as
+    # "professional experience" above: a resume header like "TECHNICAL
+    # PROJECTS" doesn't start with the bare word "projects", so it was
+    # never recognized and fell through to whatever section came before it.
+    "projects":     ["projects", "personal projects", "academic projects", "technical projects"],
     "certifications": ["certifications", "certificates", "courses", "training"],
     # "summary":      ["summary", "objective", "about me", "profile"],
     "contact":      ["contact", "email", "phone", "address", "linkedin", "github"],

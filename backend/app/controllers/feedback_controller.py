@@ -37,44 +37,63 @@ def handle_generate_feedback(data: dict) -> tuple[dict, int]:
         return {"success": False, "error": str(e)}, 500
 
     # ── Persist FeedbackReport + TodoItem rows ───────────────────────────────
+    # BUGFIX: this endpoint used to insert a new FeedbackReport (and new
+    # TodoItem rows) on every call, with no check for an existing report on
+    # this session_id. A page refresh, double-click, or the frontend firing
+    # the request twice silently duplicated rows — confirmed in real usage
+    # data (44 feedback_reports for only 22 completed sessions). Now it's
+    # idempotent: if a report already exists for this session, we return the
+    # already-persisted to-do items instead of creating duplicates.
     persisted_todos = todos
     if session_id:
         try:
-            report = FeedbackReport(
-                session_id      = session_id,
-                strengths       = "; ".join(
-                    (feedback.get("resume_section", {}).get("strengths") or [])
-                    + (feedback.get("skill_section", {}).get("strengths") or [])
-                    + (feedback.get("interview_section", {}).get("strengths") or [])
-                ),
-                weaknesses      = "; ".join(
-                    (feedback.get("resume_section", {}).get("weaknesses") or [])
-                    + (feedback.get("skill_section", {}).get("weaknesses") or [])
-                    + (feedback.get("interview_section", {}).get("weaknesses") or [])
-                ),
-                recommendations = "; ".join(t.get("task", "") for t in todos),
-            )
-            db.session.add(report)
-            db.session.flush()
+            existing_report = FeedbackReport.query.filter_by(session_id=session_id).first()
 
-            todo_rows = []
-            for t in todos:
-                row = TodoItem(
-                    feedback_id     = report.id,
-                    task            = t.get("task", ""),
-                    category        = t.get("category", "skill_development"),
-                    priority        = t.get("priority", "medium"),
-                    estimated_hours = t.get("estimated_hours", 1.0),
-                    difficulty      = t.get("difficulty", "medium"),
-                    resource_url    = t.get("resource_url"),
-                    resource_note   = t.get("resource_note"),
+            if existing_report:
+                existing_todos = TodoItem.query.filter_by(
+                    feedback_id=existing_report.id
+                ).all()
+                persisted_todos = [t.to_dict() for t in existing_todos]
+                feedback["report_id"] = existing_report.id
+                feedback["already_generated"] = True
+            else:
+                report = FeedbackReport(
+                    session_id      = session_id,
+                    strengths       = "; ".join(
+                        (feedback.get("resume_section", {}).get("strengths") or [])
+                        + (feedback.get("skill_section", {}).get("strengths") or [])
+                        + (feedback.get("interview_section", {}).get("strengths") or [])
+                    ),
+                    weaknesses      = "; ".join(
+                        (feedback.get("resume_section", {}).get("weaknesses") or [])
+                        + (feedback.get("skill_section", {}).get("weaknesses") or [])
+                        + (feedback.get("interview_section", {}).get("weaknesses") or [])
+                    ),
+                    recommendations = "; ".join(t.get("task", "") for t in todos),
                 )
-                db.session.add(row)
+                db.session.add(report)
                 db.session.flush()
-                todo_rows.append(row.to_dict())
 
-            db.session.commit()
-            persisted_todos = todo_rows  # now includes real DB ids
+                todo_rows = []
+                for t in todos:
+                    row = TodoItem(
+                        feedback_id     = report.id,
+                        task            = t.get("task", ""),
+                        category        = t.get("category", "skill_development"),
+                        priority        = t.get("priority", "medium"),
+                        estimated_hours = t.get("estimated_hours", 1.0),
+                        difficulty      = t.get("difficulty", "medium"),
+                        resource_url    = t.get("resource_url"),
+                        resource_note   = t.get("resource_note"),
+                    )
+                    db.session.add(row)
+                    db.session.flush()
+                    todo_rows.append(row.to_dict())
+
+                db.session.commit()
+                persisted_todos = todo_rows  # now includes real DB ids
+                feedback["report_id"] = report.id
+                feedback["already_generated"] = False
         except Exception as e:
             db.session.rollback()
             feedback["persistence_error"] = str(e)

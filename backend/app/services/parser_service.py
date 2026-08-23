@@ -28,6 +28,7 @@ from app.utils.constants import (
     CLOUD_DEVOPS,
     DATA_ML,
     SOFT_SKILLS,
+    CORE_CS_SUBJECTS,
 )
 from app.utils.text_cleaner import (
     clean_text,
@@ -79,6 +80,29 @@ def _add_skill_patterns(ruler):
             token_patterns = [{"LOWER": tok} for tok in skill.split()]
             patterns.append({"label": "SKILL", "pattern": token_patterns})
     ruler.add_patterns(patterns)
+
+
+# BUGFIX: constants.py lists variant spellings of the same technology as
+# separate entries (e.g. WEB_TECHNOLOGIES has "react", "reactjs", AND
+# "react.js") so each is individually matchable in resume text. But that
+# meant a resume mentioning both "React" (in Skills) and "React.js" (in a
+# project's tech stack) got counted as 2 different skills. This map
+# collapses known variants to one canonical form before counting.
+SKILL_ALIASES = {
+    "reactjs": "react", "react.js": "react",
+    "vuejs": "vue", "vue.js": "vue",
+    "angularjs": "angular",
+    "nextjs": "next.js",
+    "nodejs": "node.js", "node": "node.js",
+    "expressjs": "express",
+    "html5": "html",
+    "css3": "css",
+    "tailwindcss": "tailwind",
+    "springboot": "spring boot",
+    "sklearn": "scikit-learn",
+    "postgres": "postgresql",
+}
+
  
  
 # ── Public API ─────────────────────────────────────────────────────────────────
@@ -97,7 +121,7 @@ def parse_resume(raw_text: str) -> dict:
     return {
         "contact": _extract_contact(cleaned),
         "name":    _extract_name(cleaned, doc),
-        "skills":  _extract_skills(normalized, doc),
+        "skills":  _extract_skills(normalized, doc, sections.get("skills", "")),
         "education":   _extract_education(sections.get("education", ""), cleaned),
         "experience":  _extract_experience(sections.get("experience", ""), cleaned),
         "projects":    _extract_projects(sections.get("projects", "")),
@@ -134,12 +158,26 @@ def _extract_name(text: str, doc) -> str | None:
     return None
  
  
-def _extract_skills(normalized_text: str, doc) -> dict:
+def _extract_skills(normalized_text: str, doc, skills_section_text: str = "") -> dict:
     """
     Skill matching strategy:
     - ALL skills use word-boundary regex (\b) to prevent false positives
       like 'scala' matching inside 'scalable', or 'go' inside 'MongoDB'
     - EntityRuler NER adds extra confidence for multi-word skills
+    - Variant spellings (react / react.js, css / css3) are collapsed to one
+      canonical form so the same technology isn't counted twice.
+
+    Returns both:
+      - all_skills:      every skill found ANYWHERE in the resume (Skills
+                          section + project tech-stacks + experience bullets
+                          etc). Intentionally broad — this is what
+                          skill-gap/role matching should use, since a skill
+                          demonstrated in a project is real evidence even if
+                          the candidate didn't also list it under "Skills".
+      - declared_skills: skills found ONLY inside the resume's own "Skills"
+                          section. This is what should be used any time
+                          feedback text specifically describes "your skills
+                          section" — see BUGFIX note in feedback_service.py.
     """
     # ── Step 1: EntityRuler NER matches (multi-word skills like "machine learning") ──
     ner_skills = {ent.text.lower() for ent in doc.ents if ent.label_ == "SKILL"}
@@ -158,7 +196,22 @@ def _extract_skills(normalized_text: str, doc) -> dict:
         if re.search(pattern, normalized_text):
             regex_skills.add(skill)
  
-    all_found = ner_skills | regex_skills
+    all_found_raw = ner_skills | regex_skills
+    all_found = {SKILL_ALIASES.get(s, s) for s in all_found_raw}
+
+    # ── Declared skills: same regex pass, restricted to the Skills section ──
+    declared_raw = set()
+    if skills_section_text:
+        declared_normalized = normalize_text(skills_section_text)
+        for skill in ALL_SKILLS:
+            pattern = r"\b" + re.escape(skill) + r"\b"
+            if re.search(pattern, declared_normalized):
+                declared_raw.add(skill)
+        for skill in AMBIGUOUS_SKILLS:
+            pattern = r"\b" + re.escape(skill) + r"\b"
+            if re.search(pattern, declared_normalized):
+                declared_raw.add(skill)
+    declared_skills = sorted({SKILL_ALIASES.get(s, s) for s in declared_raw})
  
     # ── Step 4: Group by category ─────────────────────────────────────────────
     ambiguous_by_category: dict[str, list] = {}
@@ -180,7 +233,9 @@ def _extract_skills(normalized_text: str, doc) -> dict:
         "cloud_devops":          intersect(CLOUD_DEVOPS),
         "data_ml":               intersect_with_ambiguous(DATA_ML, "data_ml"),
         "soft_skills":           intersect(SOFT_SKILLS),
+        "core_cs_subjects":      intersect(CORE_CS_SUBJECTS),
         "all_skills":            sorted(all_found),
+        "declared_skills":       declared_skills,
     }
  
  
@@ -199,7 +254,12 @@ def _extract_education(education_section: str, full_text: str) -> list[dict]:
  
     raw_entries = []
     for i, lower_line in enumerate(lower_lines):
-        if any(kw in lower_line for kw in DEGREE_KEYWORDS):
+        # BUGFIX: was `kw in lower_line` — a plain substring check. Combined
+        # with short keywords like "be"/"me" (now removed, see constants.py),
+        # this also protects against any future short DEGREE_KEYWORDS entry
+        # matching inside an unrelated word. Word-boundary regex requires
+        # the keyword to appear as a whole word/token, not a fragment.
+        if any(re.search(r"\b" + re.escape(kw) + r"\b", lower_line) for kw in DEGREE_KEYWORDS):
             # Take just this line + one line after (not 3 lines — reduces noise)
             entry_text = " ".join(lines[i: i + 2]).strip()
             if len(entry_text) > 10:
@@ -268,19 +328,89 @@ def _extract_experience(section_text: str, full_text: str) -> dict:
     }
  
  
-def _extract_projects(section_text: str) -> list[str]:
-    """Return each non-empty line in the projects section as a project entry."""
+def _extract_projects(section_text: str) -> list[dict]:
+    """
+    Group lines in the projects section into individual project entries,
+    instead of treating every line as its own project.
+
+    BUGFIX: the old version appended every non-empty line >10 chars —
+    title, "Tech Stack:" line, and every bullet description — as a
+    separate "project", capped at 10. A resume with 4 real projects
+    (each spanning 3-6 lines: title, tech stack, description bullets)
+    always hit the cap and reported exactly 10, regardless of how many
+    projects were actually listed.
+
+    Grouping heuristic (validated against real resume text):
+      - A line starting with a bullet (•/-/*) or with "tech stack"
+        (with or without a bullet) belongs to the CURRENT project.
+      - A short, non-bulleted line (<=60 chars, no trailing period) is a
+        candidate project TITLE. If the current project has no body
+        content yet, treat it as a subtitle merged into the same title
+        instead of starting a new project (handles "Title" then
+        "Subtitle" on consecutive lines).
+      - Common status/date labels that sometimes land on their own line
+        due to PDF text extraction (e.g. "Currently Working") are
+        ignored rather than treated as a new project.
+      - Long non-bulleted lines, or ones ending in a period, are
+        paragraph-style descriptions (some resumes don't bullet their
+        project descriptions) and belong to the current project, not a
+        new one.
+    """
     if not section_text:
         return []
-    projects = []
-    for line in section_text.splitlines():
-        line = line.strip()
-        # Lines longer than 10 chars that look like a title / description
-        if len(line) > 10 and not line.startswith(("•", "-", "*")):
-            projects.append(line)
-        elif len(line) > 10:
-            projects.append(line[1:].strip())
-    return projects[:10]  # cap at 10
+
+    STATUS_PHRASES = {
+        "currently working", "in progress", "ongoing",
+        "completed", "present", "on-going",
+    }
+    TITLE_MAX_LEN = 60
+
+    def is_continuation_line(stripped: str) -> bool:
+        return stripped.startswith(("•", "-", "*")) or stripped.lower().startswith("tech stack")
+
+    def is_title_like(stripped: str) -> bool:
+        if stripped.lower() in STATUS_PHRASES:
+            return False
+        return len(stripped) <= TITLE_MAX_LEN and not stripped.endswith(".")
+
+    projects: list[dict] = []
+    current: dict | None = None
+
+    for raw_line in section_text.splitlines():
+        stripped = raw_line.strip()
+        if not stripped:
+            continue
+
+        if stripped.lower() in STATUS_PHRASES:
+            continue  # not a title, not real content — just skip it
+
+        if is_continuation_line(stripped):
+            if current is None:
+                current = {"title": "", "lines": []}
+            current["lines"].append(stripped.lstrip("•-* ").strip())
+            continue
+
+        if is_title_like(stripped):
+            if current is None:
+                current = {"title": stripped, "lines": []}
+            elif not current["lines"]:
+                # No body content yet under the current title -> this is
+                # a subtitle line, merge it into the same project.
+                current["title"] = f'{current["title"]} — {stripped}'
+            else:
+                projects.append(current)
+                current = {"title": stripped, "lines": []}
+        else:
+            # Long / period-terminated non-bulleted line -> paragraph
+            # description content, belongs to the current project.
+            if current is None:
+                current = {"title": "", "lines": []}
+            current["lines"].append(stripped)
+
+    if current is not None:
+        projects.append(current)
+
+    return projects[:15]
  
  
 def _extract_certifications(section_text: str) -> list[str]:

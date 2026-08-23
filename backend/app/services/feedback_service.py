@@ -134,18 +134,31 @@ def _evaluate_resume_quality(resume_data: dict) -> dict:
     score += contact_score
 
     # ── Skills section ────────────────────────────────────────────────────
+    # BUGFIX: this used to read resume_data["skills"]["all_skills"], which
+    # is deliberately scanned from the ENTIRE resume (project tech-stacks,
+    # experience bullets, etc — see parser_service._extract_skills). That's
+    # correct for skill-gap matching, but wrong here: this message
+    # specifically claims "your skills section", so it needs the count of
+    # skills actually found in the Skills section itself.
     max_score += 25
-    all_skills = resume_data.get("skills", {}).get("all_skills", [])
-    if len(all_skills) >= 10:
+    declared_skills = resume_data.get("skills", {}).get("declared_skills", [])
+    all_skills       = resume_data.get("skills", {}).get("all_skills", [])
+    if len(declared_skills) >= 10:
         score += 25
-        strengths.append(f"Strong skills section with {len(all_skills)} skills listed.")
-    elif len(all_skills) >= 5:
+        strengths.append(f"Strong skills section with {len(declared_skills)} skills listed.")
+    elif len(declared_skills) >= 5:
         score += 15
-        strengths.append(f"{len(all_skills)} skills listed — good start.")
+        strengths.append(f"{len(declared_skills)} skills listed — good start.")
         weaknesses.append("Add more relevant technical skills to reach 10+.")
     else:
         score += 5
-        weaknesses.append(f"Only {len(all_skills)} skills found — expand your skills section significantly.")
+        weaknesses.append(f"Only {len(declared_skills)} skills found — expand your skills section significantly.")
+
+    if len(all_skills) > len(declared_skills):
+        strengths.append(
+            f"{len(all_skills) - len(declared_skills)} additional skill(s) demonstrated "
+            f"in your projects/experience beyond your Skills section."
+        )
 
     # ── Education ─────────────────────────────────────────────────────────
     max_score += 20
@@ -191,7 +204,10 @@ def _evaluate_resume_quality(resume_data: dict) -> dict:
         "strengths":  strengths,
         "weaknesses": weaknesses,
         "details": {
-            "skills_count":  len(all_skills),
+            # BUGFIX: was len(all_skills) — feeds a to-do task that says
+            # "expand your skills section", so it needs the same
+            # declared_skills fix applied above, not the whole-resume scan.
+            "skills_count":  len(declared_skills),
             "education":     len(education),
             "projects":      len(projects),
             "has_linkedin":  bool(contact.get("linkedin")),
@@ -271,7 +287,21 @@ def _evaluate_interview_performance(interview_data: dict) -> dict:
     Paper: "Scoring algorithms aggregate these dimensions into overall
             response ratings while maintaining transparency about specific
             strengths and weaknesses."
+
+    BUGFIX: same class of bug already fixed for resume_data above, just
+    never applied here. The frontend stores the FULL axios response body
+    from /api/interview/evaluate-all — {"success": true, "data": {...}} —
+    directly into interview_data, then sends that whole object as-is. But
+    this function expects the flat evaluate_multiple_answers() result
+    (overall_score, individual_results, etc. at the top level). With the
+    unwrapped shape, interview_data.get("overall_score", 0) always hit the
+    default 0, which is exactly why Interview Performance always showed
+    0% regardless of how the candidate actually answered — nothing to do
+    with text vs. voice input.
     """
+    if interview_data and "data" in interview_data and "overall_score" not in interview_data:
+        interview_data = interview_data["data"]
+
     strengths  = []
     weaknesses = []
 
