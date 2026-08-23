@@ -192,9 +192,8 @@ AI-Resume-Analyzer/
 ## Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/AI-Resume-Analyzer.git
+git clone https://github.com/yourusername/RoleReady-AI.git
 
-cd AI-Resume-Analyzer
 ```
 
 ---
