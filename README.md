@@ -158,7 +158,7 @@ The system leverages modern NLP techniques including Sentence Transformers, spaC
 # 📂 Project Structure
 
 ```
-AI-Resume-Analyzer/
+RoleReady-AI/
 │
 ├── backend/
 │   ├── app/
